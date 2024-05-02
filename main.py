@@ -88,3 +88,6 @@ async def get_one_post(id:int):
     return post[0]
 
 # to run main.py server: uvicorn main:app --reload 
+
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
