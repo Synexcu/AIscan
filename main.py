@@ -43,6 +43,8 @@ POSTS = [
     },
 ]
 
+# https://useless-anastasie-synexcu.koyeb.app/ocr?q=${$formData.link}&ans=${ans}&questions=5&choices=5
+
 @app.get('/ocr')
 async def ocr(q: str = Query("bar", min_length=3), ans: str = Query(..., min_length=5), questions: int = Query(...), choices: int = Query(...)):
     # parsed_url = urlparse(image_url)
@@ -62,14 +64,14 @@ async def ocr(q: str = Query("bar", min_length=3), ans: str = Query(..., min_len
         q = q.replace("%3A", ":")
 
         # results.update({'answers': ans})
-        myIndex, grading, score = main(q, questions, choices, ans)
+        all_myIndex, all_grading, score = main(q, questions, choices, ans)
         # results.update({'myIndex': myIndex})
         # results.update({'grading': grading})
         # results.update({'score': score})
-        if myIndex is not None and grading is not None and score is not None:
+        if all_myIndex is not None and all_grading is not None and score is not None:
             response = {
-                'myIndex': myIndex,
-                'grading': grading,
+                'myIndex': all_myIndex,
+                'grading': all_grading,
                 'score': float(score)
             }
             return NumpyEncoder().encode(response)

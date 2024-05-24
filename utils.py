@@ -38,7 +38,7 @@ def stackImages(imgArray,scale,lables=[]):
                 cv2.putText(ver,lables[d][c],(eachImgWidth*c+10,eachImgHeight*d+20),cv2.FONT_HERSHEY_COMPLEX,0.7,(255,0,255),2)
     return ver
 
-def reorder(myPoints):
+def reorder(myPoints): #ORIGINAL
 
     myPoints = myPoints.reshape((4, 2)) # REMOVE EXTRA BRACKET
     # print(myPoints)
@@ -55,8 +55,80 @@ def reorder(myPoints):
 
     return myPointsNew
 
-def rectContour(contours):
+# def reorder(myPoints):
+#     # Ensure the contour has exactly 4 points
+#     if len(myPoints) != 4:
+#         return myPoints  # Return the original contour if it doesn't have 4 points
 
+#     myPoints = myPoints.reshape((4, 2))  # REMOVE EXTRA BRACKET
+#     myPointsNew = np.zeros((4, 1, 2), np.int32)  # NEW MATRIX WITH ARRANGED POINTS
+#     add = myPoints.sum(1)
+#     myPointsNew[0] = myPoints[np.argmin(add)]  # [0,0]
+#     myPointsNew[3] = myPoints[np.argmax(add)]  # [w,h]
+#     diff = np.diff(myPoints, axis=1)
+#     myPointsNew[1] = myPoints[np.argmin(diff)]  # [w,0]
+#     myPointsNew[2] = myPoints[np.argmax(diff)]  # [h,0]
+
+#     return myPointsNew
+
+def sort_contours(contours, num_contours=None, tolerance = 5):
+    # contours = [
+    # [[[441, 468]], [[441, 623]], [[640, 622]], [[639, 467]]],  # 3th answer box (Blue) | Biggest Contour [in blue] kiri atas | kiri bawah | kanan bawah | kanan atas |
+    # [[[441, 139]], [[441, 294]], [[640, 293]], [[639, 138]]],  # 1st answer box (Green) | 2nd biggest contour [in green] |
+    # [[[441, 797]], [[441, 952]], [[640, 951]], [[638, 796]]],  # 5th answer box (Red) | 3rd biggest contour [in red] |
+    # [[[441, 304]], [[442, 459]], [[640, 458]], [[639, 303]]],  # 2nd answer box (Gray) | 4th biggest contour [in gray] |
+    # [[[441, 633]], [[442, 788]], [[640, 787]], [[639, 632]]],  # 4th answer box (Blue ish gray) | 5th biggest contour [in blue-ish gray] |
+    # [[[722, 138]], [[722, 294]], [[919, 294]], [[919, 138]]],  # 6nd answer box (Blue ish gray) | 6th biggest contour [in blue-ish gray] | 
+    # [[[722, 467]], [[722, 623]], [[919, 623]], [[918, 467]]],  # 8th answer box (Gray) | 7th biggest contour [in gray] |
+    # [[[721, 633]], [[722, 788]], [[919, 788]], [[919, 632]]],  # 9th answer box (Yellow) | 8th biggest contour [in yellow] |
+    # [[[722, 303]], [[722, 459]], [[919, 459]], [[919, 303]]],  # 7th answer box (Pink) | 9th biggest contour [in pink] |
+    # [[[722, 797]], [[722, 952]], [[919, 952]], [[919, 797]]]   # 10th answer box (Purple) | 10th biggest contour [in purple] |
+    # ]
+
+    # Extract the first sub-array from each contour
+    first_sub_arrays = [contour[0][0] for contour in contours]
+
+    # Split the list into the first 5 elements and the last 5 elements
+    # first_half = first_sub_arrays[:5]
+    # second_half = first_sub_arrays[5:]
+
+    # Sort each half by the y-coordinate
+    # first_half_sorted = sorted(first_half, key=lambda point: point[0][1])
+    # second_half_sorted = sorted(second_half, key=lambda point: point[0][1])
+
+    def sorting_key(point):
+        x, y = point
+        # Apply tolerance to x-coordinate
+        x_adjusted = x // tolerance * tolerance
+        return (x_adjusted, y)
+    
+    sorted_first_sub_arrays = sorted(first_sub_arrays, key=sorting_key
+                            #  lambda point: (point[0] if len(point) > 0 else float('inf'), point[1] if len(point) > 1 else float('inf'))
+                             )
+    sorted_contours = []
+    for point in sorted_first_sub_arrays:
+        for contour in contours:
+            if np.array_equal(contour[0][0], point):
+                sorted_contours.append(contour)
+                break
+
+    # print("This is sorted_contours: ", sorted_contours)
+
+    # Combine the sorted halves
+    # sorted_first_sub_arrays = first_half_sorted + second_half_sorted
+
+    if num_contours is None:
+        return sorted_contours
+    else:
+        return sorted_contours[:num_contours]
+
+    # print("The sorted array of the first sub-arrays based on y-coordinate is:")
+    # print(sorted_first_sub_arrays)
+
+    # return sorted_first_sub_arrays
+
+def rectContour(contours): #ORIGINAL
+    #Finding outer edges
     rectCon = []
     max_area = 0
     for i in contours:
@@ -65,23 +137,34 @@ def rectContour(contours):
         if area > 50: #Area min
             peri = cv2.arcLength(i, True)
             approx = cv2.approxPolyDP(i, 0.02 * peri, True)
-            #print("Corner Points", len(approx))
+            # print("Corner Points", len(approx))
             if len(approx) == 4:
                 rectCon.append(i)
     rectCon = sorted(rectCon, key=cv2.contourArea,reverse=True)
-    #print(len(rectCon))
+    # print(len(rectCon))
     return rectCon
+
+# def rectContour(contours):
+#     rectCon = []
+#     for i in contours:
+#         area = cv2.contourArea(i)
+#         if area > 50:  # Area min
+#             peri = cv2.arcLength(i, True)
+#             approx = cv2.approxPolyDP(i, 0.02 * peri, True)
+#             if len(approx) == 4:  # Check if the contour has exactly 4 points
+#                 rectCon.append(approx)  # Append the contour with 4 points
+#     return rectCon
 
 def getCornerPoints(cont):
     peri = cv2.arcLength(cont, True) # LENGTH OF CONTOUR
     approx = cv2.approxPolyDP(cont, 0.02 * peri, True) # APPROXIMATE THE POLY TO GET CORNER POINTS
     return approx
 
-def splitBoxes(img):
-    rows = np.vsplit(img,5) #Get A B C D E as one row
+def splitBoxes(img, choices):
+    rows = np.vsplit(img, 5) #Get A B C D E as one row
     boxes=[]
     for r in rows:
-        cols= np.hsplit(r,5)
+        cols= np.hsplit(r,choices)
         for box in cols:
             boxes.append(box)
             # cv2.imshow("Split", box)
