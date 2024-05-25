@@ -77,7 +77,7 @@ def main (path,
     # biggestContour = utils.getCornerPoints(rectCon[1])
     # print("This is biggestContour: ", biggestContour)
     # loopContours = firstContour
-    gradePoints = utils.getCornerPoints(rectCon[20]) #Set Grade Area #20
+    # gradePoints = utils.getCornerPoints(rectCon[20]) #Set Grade Area #20
 
 
     # print("This is biggest Contour [in blue]: ", getbigcontours(0))
@@ -93,7 +93,7 @@ def main (path,
 
 
 
-    if questions % 5 == 0 and gradePoints.size != 0:
+    if questions % 5 == 0:
         o = 0
         all_myIndex = []
         all_grading = []
@@ -118,7 +118,7 @@ def main (path,
 
             loopContour = utils.reorder(loopContour)
             # print("This is biggest contour with reorder: ", biggestContour)
-            gradePoints = utils.reorder(gradePoints)
+            # gradePoints = utils.reorder(gradePoints)
 
             ## Answer Column area
             pt1 = np.float32(loopContour)
