@@ -14,13 +14,17 @@ def main (path,
           ):
 
     ### DEFINING
+    widthImg = 700
+    heightImg = 700
+    
     ## Online Path
     resp = requests.get(path, stream=True).raw
     onlineArr = np.asarray(bytearray(resp.read()), dtype=np.uint8)
     imgOnline = cv2.imdecode(onlineArr, cv2.IMREAD_COLOR)
 
-    widthImg = 700
-    heightImg = 700
+    imgOnline = cv2.resize(imgOnline,(widthImg, heightImg))
+    img = imgOnline
+
 
     letter_to_number = {
             'A': 0,
@@ -29,8 +33,6 @@ def main (path,
             'D': 3,
             'E': 4}
 
-    # imgOnline = cv2.resize(imgOnline,(widthImg, heightImg))
-    img = imgOnline
 
     ## Offline path
     # img = cv2.imread(path)
@@ -65,11 +67,11 @@ def main (path,
     ## FINDING ALL RECTANGLES
     rectCon = utils.rectContour(contours)
     contour_points = [utils.getCornerPoints(rectCon[i]) for i in range(10)]
-    # print("This is contour points: ", contour_points)
+    print("This is contour points: ", contour_points)
 
     sorted_contours = utils.sort_contours(contour_points, boxSequence)
-    # print("The sorted array of the first sub-arrays based on y-coordinate is:")
-    # print(sorted_contours)
+    print("The sorted array of the first sub-arrays based on y-coordinate is:")
+    print(sorted_contours)
 
     # firstContour = sorted_contours[0]
     # print("This is firstContour: ", firstContour)
@@ -101,19 +103,19 @@ def main (path,
         for o in range(boxSequence):
 
             loopContour = sorted_contours[o]
-            # print("This is", o, "contour: ", loopContour)
+            print("This is", o, "contour: ", loopContour)
             
             # cv2.drawContours(imgBiggestContours, gradePoints, -1, (255, 0, 0), 20)
-            # cv2.drawContours(imgBiggestContours, getbigcontours(0), -1, (255, 0, 0), 20) # 3th answer box (Blue)
-            # cv2.drawContours(imgBiggestContours, getbigcontours(1), -1, (0, 255, 0), 20) # 1st answer box (Green)
-            # cv2.drawContours(imgBiggestContours, getbigcontours(2), -1, (0,0,255), 20) # 5th answer box (Red)
-            # cv2.drawContours(imgBiggestContours, getbigcontours(3), -1, (150, 150, 150), 20) # 2nd answer box (Gray)
-            # cv2.drawContours(imgBiggestContours, getbigcontours(4), -1, (255, 150, 150), 20) # 4th answer box (Blue ish Gray)
-            # cv2.drawContours(imgBiggestContours, getbigcontours(5), -1, (255, 150, 150), 20) # 6nd answer box (Blue ish Gray)
-            # cv2.drawContours(imgBiggestContours, getbigcontours(6), -1, (150, 150, 150), 20) # 8th answer box (Gray)
-            # cv2.drawContours(imgBiggestContours, getbigcontours(7), -1, (0, 255, 255), 20) # 9th answer box (Yellow)
-            # cv2.drawContours(imgBiggestContours, getbigcontours(8), -1, (150, 150, 255), 20) # 7th answer box (Pink)
-            # cv2.drawContours(imgBiggestContours, getbigcontours(9), -1, (255, 0, 255), 20) # 10th answer box (Purple)
+            cv2.drawContours(imgBiggestContours, getbigcontours(0), -1, (255, 0, 0), 20) # 3th answer box (Blue)
+            cv2.drawContours(imgBiggestContours, getbigcontours(1), -1, (0, 255, 0), 20) # 1st answer box (Green)
+            cv2.drawContours(imgBiggestContours, getbigcontours(2), -1, (0,0,255), 20) # 5th answer box (Red)
+            cv2.drawContours(imgBiggestContours, getbigcontours(3), -1, (150, 150, 150), 20) # 2nd answer box (Gray)
+            cv2.drawContours(imgBiggestContours, getbigcontours(4), -1, (255, 150, 150), 20) # 4th answer box (Blue ish Gray)
+            cv2.drawContours(imgBiggestContours, getbigcontours(5), -1, (255, 150, 150), 20) # 6nd answer box (Blue ish Gray)
+            cv2.drawContours(imgBiggestContours, getbigcontours(6), -1, (150, 150, 150), 20) # 8th answer box (Gray)
+            cv2.drawContours(imgBiggestContours, getbigcontours(7), -1, (0, 255, 255), 20) # 9th answer box (Yellow)
+            cv2.drawContours(imgBiggestContours, getbigcontours(8), -1, (150, 150, 255), 20) # 7th answer box (Pink)
+            cv2.drawContours(imgBiggestContours, getbigcontours(9), -1, (255, 0, 255), 20) # 10th answer box (Purple)
             
 
             loopContour = utils.reorder(loopContour)
@@ -135,7 +137,7 @@ def main (path,
 
             ## Apply answer threshold
             imgWarpGray = cv2.cvtColor(imgWarpColored, cv2.COLOR_BGR2GRAY)
-            imgThresh = cv2.threshold(imgWarpGray, 150, 255, cv2.THRESH_BINARY_INV)[1]
+            imgThresh = cv2.threshold(imgWarpGray, 130, 255, cv2.THRESH_BINARY_INV)[1]
 
             boxes = utils.splitBoxes(imgThresh, choices)
             # cv2.imshow("Test", boxes[1]) #Edge
@@ -192,15 +194,15 @@ def main (path,
             # imgBlank = np.zeros_like(img) #Decoy Image for imgArray
 
             # Put into Image Array
-            # imgArray = ([img, imgGray, imgBlur, imgCanny],
-            #             [imgContours, imgBiggestContours, imgWarpColored, imgThresh])
+            imgArray = ([img, imgGray, imgBlur, imgCanny],
+                        [imgContours, imgBiggestContours, imgWarpColored, imgThresh])
 
-            # imgStacked = utils.stackImages(imgArray, 0.5)
+            imgStacked = utils.stackImages(imgArray, 0.5)
 
 
             ### SHOW
-            # cv2.imshow("Stacked Images",imgStacked)
-            # cv2.waitKey(0)
+            cv2.imshow("Stacked Images",imgStacked)
+            cv2.waitKey(0)
 
             # return myIndex, grading, score
 
