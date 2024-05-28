@@ -194,15 +194,15 @@ def main (path,
             # imgBlank = np.zeros_like(img) #Decoy Image for imgArray
 
             # Put into Image Array
-            imgArray = ([img, imgGray, imgBlur, imgCanny],
-                        [imgContours, imgBiggestContours, imgWarpColored, imgThresh])
+            # imgArray = ([img, imgGray, imgBlur, imgCanny],
+            #             [imgContours, imgBiggestContours, imgWarpColored, imgThresh])
 
-            imgStacked = utils.stackImages(imgArray, 0.5)
+            # imgStacked = utils.stackImages(imgArray, 0.5)
 
 
             ### SHOW
-            cv2.imshow("Stacked Images",imgStacked)
-            cv2.waitKey(0)
+            # cv2.imshow("Stacked Images",imgStacked)
+            # cv2.waitKey(0)
 
             # return myIndex, grading, score
 
